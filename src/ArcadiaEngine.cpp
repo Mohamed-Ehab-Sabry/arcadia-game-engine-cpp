@@ -72,6 +72,7 @@ private:
     int max_level;
     int current_level;
     double probability;
+    vector<Node *> update;
 
 public:
     ConcreteLeaderboard()
@@ -81,32 +82,99 @@ public:
         current_level = 0;
         probability = 0.5;
         header = new Node(-1, INT_MAX, max_level);
+        update = vector<Node *>(max_level + 1, nullptr);
     }
 
     int randomLevel()
     {
-        while (current_level < max_level && (rand() % 100) < (probability * 100))
+        int level = 0;
+        while (level < max_level && (rand() % 100) < (probability * 100))
         {
-            current_level++;
+            level++;
         }
-        return current_level;
+        return level;
     }
 
     void addScore(int playerID, int score) override
     {
         // TODO: Implement skip list insertion
         // Remember to maintain descending order by score
+        removePlayer(playerID);
+
+        int level = randomLevel();
+
+        Node *current = header;
+        for (int i = level; i >= 0; i--)
+        {
+            while (current->forward[i] != nullptr && current->forward[i]->score > score)
+            {
+                current = current->forward[i];
+            }
+            if (current->forward[i] != nullptr && current->forward[i]->score == score && current->forward[i]->playerID < playerID)
+            {
+                current = current->forward[i];
+            }
+            update[i] = current;
+        }
+
+        Node *newNode = new Node(playerID, score, level + 1);
+        for (int i = 0; i <= level; i++)
+        {
+            newNode->forward[i] = update[i]->forward[i];
+            update[i]->forward[i] = newNode;
+        }
+
+        if (level > current_level)
+        {
+            current_level = level;
+        }
     }
 
     void removePlayer(int playerID) override
     {
         // TODO: Implement skip list deletion
+        Node *current = header;
+        for (int i = max_level; i >= 0; i--)
+        {
+            while (current->forward[i] != nullptr && current->forward[i]->playerID != playerID)
+            {
+                current = current->forward[i];
+            }
+            update[i] = current;
+        }
+
+        current = update[0]->forward[0];
+        if (current == nullptr || current->playerID != playerID)
+        {
+            cout << "Player not found" << endl;
+            return;
+        }
+
+        // Deleting the node from every level
+        for (int i = 0; i <= max_level; i++)
+        {
+            if (update[i]->forward[i] != nullptr && update[i]->forward[i]->playerID == playerID)
+            {
+                update[i]->forward[i] = current->forward[i];
+            }
+        }
+
+        delete current;
     }
 
     vector<int> getTopN(int n) override
     {
         // TODO: Return top N player IDs in descending score order
-        return {};
+        vector<int> result;
+        Node *current = header->forward[0];
+
+        while (current != nullptr && result.size() < n)
+        {
+            result.push_back(current->playerID);
+            current = current->forward[0];
+        }
+
+        return result;
     }
 };
 
