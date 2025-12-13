@@ -718,7 +718,73 @@ string WorldNavigator::sumMinDistancesBinary(int n, vector<vector<int>> &roads)
     // Sum all shortest distances between unique pairs (i < j)
     // Return the sum as a binary string
     // Hint: Handle large numbers carefully
-    return "0";
+
+    vector<vector<long long>> shortest_path(n, vector<long long>(n, LLONG_MAX));
+    for (int i = 0; i < n; i++)
+    {
+        shortest_path[i][i] = 0;
+    }
+
+    for (auto &road : roads)
+    {
+
+        shortest_path[road[0]][road[1]] = min((long long)road[2], shortest_path[road[0]][road[1]]);
+    }
+
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (shortest_path[i][k] == LLONG_MAX || shortest_path[k][j] == LLONG_MAX)
+                {
+                    continue;
+                }
+
+                if (shortest_path[i][j] > shortest_path[i][k] + shortest_path[k][j])
+                {
+                    shortest_path[i][j] = shortest_path[i][k] + shortest_path[k][j];
+                }
+            }
+        }
+    }
+
+    long long sum = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+            if (shortest_path[i][j] == LLONG_MAX)
+            {
+                continue;
+            }
+            sum += shortest_path[i][j];
+        }
+    }
+
+    string sum_string = "";
+
+    if (sum == 0)
+    {
+        sum_string = "0";
+    }
+
+    while (sum > 0)
+    {
+        if (sum & 1)
+        {
+            sum_string += "1";
+        }
+        else
+        {
+            sum_string += "0";
+        }
+        sum >>= 1;
+    }
+    reverse(sum_string.begin(), sum_string.end());
+
+    return sum_string;
 }
 
 // =========================================================
