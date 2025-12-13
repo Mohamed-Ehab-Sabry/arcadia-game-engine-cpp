@@ -242,6 +242,45 @@ bool WorldNavigator::pathExists(int n, vector<vector<int>> &edges, int source, i
 {
     // TODO: Implement path existence check using BFS or DFS
     // edges are bidirectional
+
+    vector<vector<int>> neighbors(n);
+
+    for (auto &road : edges)
+    {
+        int first_city = road[0];
+        int second_city = road[1];
+
+        neighbors[first_city].push_back(second_city);
+        neighbors[second_city].push_back(first_city);
+    }
+
+    vector<bool> visited(n, 0);
+    queue<int> visiting;
+    visiting.push(source);
+    visited[source] = true;
+    int current_city = 0;
+
+    while (!visiting.empty())
+    {
+        current_city = visiting.front();
+        visiting.pop();
+
+        if (dest == current_city)
+        {
+            return true;
+        }
+
+        for (auto &neighbor : neighbors[current_city])
+        {
+            if (visited[neighbor] == true)
+            {
+                continue;
+            }
+            visited[neighbor] = true;
+            visiting.push(neighbor);
+        }
+    }
+
     return false;
 }
 
