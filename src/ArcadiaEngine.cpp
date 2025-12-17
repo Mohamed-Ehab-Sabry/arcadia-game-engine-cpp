@@ -812,6 +812,19 @@ int ServerKernel::minIntervals(vector<char> &tasks, int n)
     // Same task must wait 'n' intervals before running again
     // Return minimum total intervals needed (including idle time)
     // Hint: Use greedy approach with frequency counting
+    vector<int> freq(26);
+    for (char c :tasks) {
+        freq[c-'A']++;
+    }
+    int max_frequent = *max_element(freq.begin() , freq.end());
+    int max_count = 0;
+    for (int i : freq) {
+        if (i == max_frequent)
+            max_count++;
+    }
+    int total_intervals = (max_frequent -1)* (n+1)+max_count();
+
+    return max((int)tasks.size(), total_intervals);
     return 0;
 }
 
