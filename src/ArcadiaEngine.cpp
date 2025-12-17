@@ -673,28 +673,37 @@ public:
 // PART B: INVENTORY SYSTEM (Dynamic Programming)
 // =========================================================
 
-int mn;
-int target;
-int best;
-int cnt;
+int sum = 0;
+int best, cnt, mn, target;
 int dp[51][100000];
 int InventorySystem::optimizeLootSplit(int n, vector<int> &coins)
 {
-    if(n == coins.size()){
+    if(n == coins.size()) {
+        for (int i = 0; i < n; i++)
+        {
+            sum += coins[i];
+        }
+        target = sum/2;
+        mn = 1e9;
+        best = 0;
+        cnt = 0;
+        n--;
+    }
+    if(n == -1){
         if(mn > abs(cnt-target)){
             mn = abs(cnt-target);
             best = cnt;
         }
-        return 0;
+        return abs(best-(sum-best));
     }
     int &ret = dp[n][cnt];
     if(~ret) {
         return ret;
     }
     cnt += coins[n];
-    int take = optimizeLootSplit(n+1, coins);
+    int take = optimizeLootSplit(n-1, coins);
     cnt -= coins[n];
-    int skip = optimizeLootSplit(n+1, coins);
+    int skip = optimizeLootSplit(n-1, coins);
     
     return ret = min(take, skip);
 }
