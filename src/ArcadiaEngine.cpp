@@ -627,28 +627,37 @@ public:
 // PART B: INVENTORY SYSTEM (Dynamic Programming)
 // =========================================================
 
-int mn;
-int target;
-int best;
-int cnt;
+int sum = 0;
+int best, cnt, mn, target;
 int dp[51][100000];
 int InventorySystem::optimizeLootSplit(int n, vector<int> &coins)
 {
-    if(n == coins.size()){
+    if(n == coins.size()) {
+        for (int i = 0; i < n; i++)
+        {
+            sum += coins[i];
+        }
+        target = sum/2;
+        mn = 1e9;
+        best = 0;
+        cnt = 0;
+        n--;
+    }
+    if(n == -1){
         if(mn > abs(cnt-target)){
             mn = abs(cnt-target);
             best = cnt;
         }
-        return 0;
+        return abs(best-(sum-best));
     }
     int &ret = dp[n][cnt];
     if(~ret) {
         return ret;
     }
     cnt += coins[n];
-    int take = optimizeLootSplit(n+1, coins);
+    int take = optimizeLootSplit(n-1, coins);
     cnt -= coins[n];
-    int skip = optimizeLootSplit(n+1, coins);
+    int skip = optimizeLootSplit(n-1, coins);
     
     return ret = min(take, skip);
 }
@@ -738,45 +747,10 @@ bool WorldNavigator::pathExists(int n, vector<vector<int>> &edges, int source, i
 long long WorldNavigator::minBribeCost(int n, int m, long long goldRate, long long silverRate,
                                        vector<vector<int>> &roadData)
 {
-    vector<vector<pair<int,long long>>>adj(n+1);
-    vector<bool>visited(n+1);
-
-    for (int i = 0; i < m; i++)
-    {
-        int u = roadData[i][0], v = roadData[i][1];
-        long long weight = 1LL * roadData[i][2]*goldRate + 1LL * roadData[i][3]*silverRate; 
-        adj[u].push_back({v, weight});
-        adj[v].push_back({u,weight});
-    }
-
-    priority_queue<pair<long long,int>,vector<pair<long long,int>>,greater<pair<long long,int>>>pq;
-
-    pq.push({0,1});
-
-    long long total_cost = 0;
-    int visited_cities = 0;
-    while(visited_cities < n && !pq.empty()){
-
-        long long weight = pq.top().first;
-        int city = pq.top().second;
-        pq.pop();
-
-        if(visited[city]) continue;
-
-        visited[city] = 1;
-        visited_cities++;
-        total_cost += weight;
-        for(auto u : adj[city]){
-            if(!visited[u.first]){
-                pq.push({u.second, u.first});
-            }
-        }
-
-    }
-
-    if(visited_cities == n) return total_cost;
-    
-    return -1;
+    // TODO: Implement Bribe Cost Minimization using DP
+    // roadData = {source, destination, gold, silver}
+    // Return minimum cost to bribe all m tourists
+    return 0;
 }
 
 string WorldNavigator::sumMinDistancesBinary(int n, vector<vector<int>> &roads)
