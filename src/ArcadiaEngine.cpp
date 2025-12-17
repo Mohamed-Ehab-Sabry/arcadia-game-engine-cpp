@@ -27,23 +27,69 @@ class ConcretePlayerTable : public PlayerTable
 private:
     // TODO: Define your data structures here
     // Hint: You'll need a hash table with double hashing collision resolution
+    struct Player {
+        int ID;
+        string Name;
+        bool is_occupied ;
+    };
+    int H1 (int playerId) {
+        double A = 0.618033;
+        double val = playerId * A;
+        double fractionalPart = val - floor(val); // تعادل (val % 1)
+        return floor(101 * fractionalPart);
+    }
+    int H2(int playerId) {
+        return 13 - (playerId % 13);
+    }
+    Player playersTable[101];
 
 public:
     ConcretePlayerTable()
     {
         // TODO: Initialize your hash table
+        for (auto &p: playersTable) {
+            p.is_occupied = false;
+            p.ID = -1;
+            p.Name = "";
+        }
     }
 
     void insert(int playerID, string name) override
     {
         // TODO: Implement double hashing insert
         // Remember to handle collisions using h1(key) + i * h2(key)
+        int h1 = H1(playerID);
+        int h2 = H2(playerID);
+        int i = 0 ;
+        int idx = (h1+ i*h2) % 101;
+        while(playersTable[idx].is_occupied && i < 101) {
+            idx = (h1+ ++i*h2) % 101;
+        }
+        if(i >= 101) {
+            throw runtime_error("Table is Full");
+        }
+        playersTable[idx].ID = playerID;
+        playersTable[idx].is_occupied = true;
+        playersTable[idx].Name = name;
     }
 
     string search(int playerID) override
     {
         // TODO: Implement double hashing search
         // Return "" if player not found
+        int h1 = H1(playerID);
+        int h2 = H2(playerID);
+        int i = 0 ;
+        while (i < 101) {
+            int idx = (h1+ i*h2) % 101;
+            if (!playersTable[idx].is_occupied) {
+                return "" ;
+            }
+            if (playersTable[idx].ID == playerID) {
+                return playersTable[idx].Name;
+            }
+            i++;
+        }
         return "";
     }
 };
@@ -812,7 +858,6 @@ int ServerKernel::minIntervals(vector<char> &tasks, int n)
     // Same task must wait 'n' intervals before running again
     // Return minimum total intervals needed (including idle time)
     // Hint: Use greedy approach with frequency counting
-    return 0;
 }
 
 // =========================================================
