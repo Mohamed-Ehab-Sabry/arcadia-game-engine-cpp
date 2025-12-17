@@ -27,23 +27,69 @@ class ConcretePlayerTable : public PlayerTable
 private:
     // TODO: Define your data structures here
     // Hint: You'll need a hash table with double hashing collision resolution
+    struct Player {
+        int ID;
+        string Name;
+        bool is_occupied ;
+    };
+    int H1 (int playerId) {
+        double A = 0.618033;
+        double val = playerId * A;
+        double fractionalPart = val - floor(val); // تعادل (val % 1)
+        return floor(101 * fractionalPart);
+    }
+    int H2(int playerId) {
+        return 13 - (playerId % 13);
+    }
+    Player playersTable[101];
 
 public:
     ConcretePlayerTable()
     {
         // TODO: Initialize your hash table
+        for (auto &p: playersTable) {
+            p.is_occupied = false;
+            p.ID = -1;
+            p.Name = "";
+        }
     }
 
     void insert(int playerID, string name) override
     {
         // TODO: Implement double hashing insert
         // Remember to handle collisions using h1(key) + i * h2(key)
+        int h1 = H1(playerID);
+        int h2 = H2(playerID);
+        int i = 0 ;
+        int idx = (h1+ i*h2) % 101;
+        while(playersTable[idx].is_occupied && i < 101) {
+            idx = (h1+ ++i*h2) % 101;
+        }
+        if(i >= 101) {
+            throw runtime_error("Table is Full");
+        }
+        playersTable[idx].ID = playerID;
+        playersTable[idx].is_occupied = true;
+        playersTable[idx].Name = name;
     }
 
     string search(int playerID) override
     {
         // TODO: Implement double hashing search
         // Return "" if player not found
+        int h1 = H1(playerID);
+        int h2 = H2(playerID);
+        int i = 0 ;
+        while (i < 101) {
+            int idx = (h1+ i*h2) % 101;
+            if (!playersTable[idx].is_occupied) {
+                return "" ;
+            }
+            if (playersTable[idx].ID == playerID) {
+                return playersTable[idx].Name;
+            }
+            i++;
+        }
         return "";
     }
 };
@@ -627,12 +673,30 @@ public:
 // PART B: INVENTORY SYSTEM (Dynamic Programming)
 // =========================================================
 
+int mn;
+int target;
+int best;
+int cnt;
+int dp[51][100000];
 int InventorySystem::optimizeLootSplit(int n, vector<int> &coins)
 {
-    // TODO: Implement partition problem using DP
-    // Goal: Minimize |sum(subset1) - sum(subset2)|
-    // Hint: Use subset sum DP to find closest sum to total/2
-    return 0;
+    if(n == coins.size()){
+        if(mn > abs(cnt-target)){
+            mn = abs(cnt-target);
+            best = cnt;
+        }
+        return 0;
+    }
+    int &ret = dp[n][cnt];
+    if(~ret) {
+        return ret;
+    }
+    cnt += coins[n];
+    int take = optimizeLootSplit(n+1, coins);
+    cnt -= coins[n];
+    int skip = optimizeLootSplit(n+1, coins);
+    
+    return ret = min(take, skip);
 }
 
 int InventorySystem::maximizeCarryValue(int capacity, vector<pair<int, int>> &items)
@@ -720,10 +784,44 @@ bool WorldNavigator::pathExists(int n, vector<vector<int>> &edges, int source, i
 long long WorldNavigator::minBribeCost(int n, int m, long long goldRate, long long silverRate,
                                        vector<vector<int>> &roadData)
 {
-    // TODO: Implement Minimum Spanning Tree (Kruskal's or Prim's)
-    // roadData[i] = {u, v, goldCost, silverCost}
-    // Total cost = goldCost * goldRate + silverCost * silverRate
-    // Return -1 if graph cannot be fully connected
+    vector<vector<pair<int,long long>>>adj(n+1);
+    vector<bool>visited(n+1);
+
+    for (int i = 0; i < m; i++)
+    {
+        int u = roadData[i][0], v = roadData[i][1];
+        long long weight = 1LL * roadData[i][2]*goldRate + 1LL * roadData[i][3]*silverRate; 
+        adj[u].push_back({v, weight});
+        adj[v].push_back({u,weight});
+    }
+
+    priority_queue<pair<long long,int>,vector<pair<long long,int>>,greater<pair<long long,int>>>pq;
+
+    pq.push({0,1});
+
+    long long total_cost = 0;
+    int visited_cities = 0;
+    while(visited_cities < n && !pq.empty()){
+
+        long long weight = pq.top().first;
+        int city = pq.top().second;
+        pq.pop();
+
+        if(visited[city]) continue;
+
+        visited[city] = 1;
+        visited_cities++;
+        total_cost += weight;
+        for(auto u : adj[city]){
+            if(!visited[u.first]){
+                pq.push({u.second, u.first});
+            }
+        }
+
+    }
+
+    if(visited_cities == n) return total_cost;
+    
     return -1;
 }
 
