@@ -116,105 +116,115 @@ private:
         int score;
         vector<Node *> forward;
         Node(int id, int s, int level)
-        {
-            this->playerID = id;
-            this->score = s;
-            this->forward = vector<Node *>(level, nullptr);
-        }
+            : playerID(id), score(s), forward(level, nullptr) {}
     };
 
-    Node *header;
-    int max_level;
-    int current_level;
+    int maxLevel;
+    int currentLevel;
     double probability;
-    vector<Node *> update;
+    Node *header;
+
+    int randomLevel()
+    {
+        int lvl = 0;
+        while (((double)rand() / RAND_MAX) < probability && lvl < maxLevel)
+        {
+            lvl++;
+        }
+        return lvl;
+    }
 
 public:
     ConcreteLeaderboard()
     {
         // TODO: Initialize your skip list
-        max_level = 16;
-        current_level = 0;
+        maxLevel = 16;
+        currentLevel = 0;
         probability = 0.5;
-        header = new Node(-1, INT_MAX, max_level);
-        update = vector<Node *>(max_level + 1, nullptr);
-    }
-
-    int randomLevel()
-    {
-        int level = 0;
-        while (level < max_level && (rand() % 100) < (probability * 100))
-        {
-            level++;
-        }
-        return level;
+        header = new Node(-1, INT_MAX, maxLevel + 1);
+        srand(time(nullptr));
     }
 
     void addScore(int playerID, int score) override
     {
         // TODO: Implement skip list insertion
         // Remember to maintain descending order by score
+
+        // Remove old score if player exists
         removePlayer(playerID);
 
-        int level = randomLevel();
-
+        vector<Node *> update(maxLevel + 1, nullptr);
         Node *current = header;
-        for (int i = level; i >= 0; i--)
+
+        for (int i = currentLevel; i >= 0; i--)
         {
-            while (current->forward[i] != nullptr && current->forward[i]->score > score)
-            {
-                current = current->forward[i];
-            }
-            if (current->forward[i] != nullptr && current->forward[i]->score == score && current->forward[i]->playerID < playerID)
+            while (
+                current->forward[i] != nullptr &&
+                (current->forward[i]->score > score ||
+                 (current->forward[i]->score == score &&
+                  current->forward[i]->playerID < playerID)))
             {
                 current = current->forward[i];
             }
             update[i] = current;
         }
 
-        Node *newNode = new Node(playerID, score, level + 1);
-        for (int i = 0; i <= level; i++)
+        int lvl = randomLevel();
+
+        if (lvl > currentLevel)
+        {
+            for (int i = currentLevel + 1; i <= lvl; i++)
+                update[i] = header;
+            currentLevel = lvl;
+        }
+
+        Node *newNode = new Node(playerID, score, lvl + 1);
+
+        for (int i = 0; i <= lvl; i++)
         {
             newNode->forward[i] = update[i]->forward[i];
             update[i]->forward[i] = newNode;
-        }
-
-        if (level > current_level)
-        {
-            current_level = level;
         }
     }
 
     void removePlayer(int playerID) override
     {
         // TODO: Implement skip list deletion
-        Node *current = header;
-        for (int i = max_level; i >= 0; i--)
+        Node *target = nullptr;
+        Node *prev = header;
+
+        while (prev->forward[0] != nullptr)
         {
-            while (current->forward[i] != nullptr && current->forward[i]->playerID != playerID)
+            if (prev->forward[0]->playerID == playerID)
             {
-                current = current->forward[i];
+                target = prev->forward[0];
+                break;
             }
-            update[i] = current;
+            prev = prev->forward[0];
         }
 
-        current = update[0]->forward[0];
-        if (current == nullptr || current->playerID != playerID)
-        {
-            cout << "Player not found" << endl;
+        if (target == nullptr)
             return;
-        }
 
         // Deleting the node from every level
-        for (int i = 0; i <= max_level; i++)
+        for (int i = 0; i <= currentLevel; i++)
         {
-            if (update[i]->forward[i] != nullptr && update[i]->forward[i]->playerID == playerID)
+            Node *curr = header;
+            while (curr->forward[i] != nullptr && curr->forward[i] != target)
             {
-                update[i]->forward[i] = current->forward[i];
+                curr = curr->forward[i];
             }
+
+            if (curr->forward[i] == target)
+                curr->forward[i] = target->forward[i];
         }
 
-        delete current;
+        delete target;
+
+        while (currentLevel > 0 && header->forward[currentLevel] == nullptr)
+        {
+            currentLevel--;
+        }
     }
 
     vector<int> getTopN(int n) override
@@ -223,7 +233,7 @@ public:
         vector<int> result;
         Node *current = header->forward[0];
 
-        while (current != nullptr && result.size() < n)
+        while (current != nullptr && (int)result.size() < n)
         {
             result.push_back(current->playerID);
             current = current->forward[0];
