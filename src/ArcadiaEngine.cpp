@@ -741,7 +741,36 @@ int InventorySystem::maximizeCarryValue(int capacity, vector<pair<int, int>> &it
     // TODO: Implement 0/1 Knapsack using DP
     // items = {weight, value} pairs
     // Return maximum value achievable within capacity
-    return 0;
+
+    int num_of_items = items.size();
+    vector<vector<int>> best_pos_values(num_of_items + 1, vector<int>(capacity + 1, 0));
+    for (int i = 1; i <= num_of_items; i++)
+    {
+        for (int j = 1; j <= capacity; j++)
+        {
+            int weight = items[i - 1].first;
+            int value = items[i - 1].second;
+            int prev_item_value = best_pos_values[i - 1][j];
+            if (weight <= j)
+            {
+                int prev_best_pos_value = best_pos_values[i - 1][j - weight];
+                if (value + prev_best_pos_value > prev_item_value)
+                {
+                    best_pos_values[i][j] = value + prev_best_pos_value;
+                }
+                else
+                {
+                    best_pos_values[i][j] = prev_item_value;
+                }
+            }
+            else
+            {
+                best_pos_values[i][j] = prev_item_value;
+            }
+        }
+    }
+
+    return best_pos_values[num_of_items][capacity];
 }
 
 long long InventorySystem::countStringPossibilities(string s)
