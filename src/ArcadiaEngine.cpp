@@ -748,8 +748,8 @@ int InventorySystem::maximizeCarryValue(int capacity, vector<pair<int, int>> &it
     {
         for (int j = 1; j <= capacity; j++)
         {
-            int weight = items[i].first;
-            int value = items[i].first;
+            int weight = items[i - 1].first;
+            int value = items[i - 1].second;
             int prev_item_value = best_pos_values[i - 1][j];
             if (weight <= j)
             {
