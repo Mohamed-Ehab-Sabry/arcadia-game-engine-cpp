@@ -700,43 +700,40 @@ public:
 // PART B: INVENTORY SYSTEM (Dynamic Programming)
 // =========================================================
 
-int sum = 0;
-int best, cnt, mn, target;
-int dp[51][100000];
 int InventorySystem::optimizeLootSplit(int n, vector<int> &coins)
 {
-    if (n == coins.size())
-    {
-        for (int i = 0; i < n; i++)
-        {
-            sum += coins[i];
-        }
-        target = sum / 2;
-        mn = 1e9;
-        best = 0;
-        cnt = 0;
-        n--;
-    }
-    if (n == -1)
-    {
-        if (mn > abs(cnt - target))
-        {
-            mn = abs(cnt - target);
-            best = cnt;
-        }
-        return abs(best - (sum - best));
-    }
-    int &ret = dp[n][cnt];
-    if (~ret)
-    {
-        return ret;
-    }
-    cnt += coins[n];
-    int take = optimizeLootSplit(n - 1, coins);
-    cnt -= coins[n];
-    int skip = optimizeLootSplit(n - 1, coins);
+    int sum = 0;
+    int diff = INT_MAX;
 
-    return ret = min(take, skip);
+    for (int i = 0; i < n; i++)
+    {
+        sum += coins[i];
+    }
+    int target = sum/2;
+
+    vector<vector<bool>>dp(n+1,vector<bool>(target+1));
+
+    dp[0][0] = 1;
+
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 0; j <= target; j++)
+        {
+            dp[i][j] = dp[i-1][j];
+            if(j - coins[i-1] >= 0 && dp[i-1][j - coins[i-1]] == 1){
+                dp[i][j] = 1;
+            }
+        }
+    }
+
+    for (int i = 0; i <= target; i++)
+    {
+        if(dp[n][i]){
+            diff = min(diff, abs((sum - i) - i));
+        }
+    }
+
+    return diff;
 }
 
 int InventorySystem::maximizeCarryValue(int capacity, vector<pair<int, int>> &items)
