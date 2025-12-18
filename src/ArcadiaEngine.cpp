@@ -126,7 +126,7 @@ private:
     int currentLevel;
     double probability;
     Node *header;
-
+    vector<int> playerScores; 
     int randomLevel()
     {
         int lvl = 0;
@@ -146,6 +146,7 @@ public:
         probability = 0.5;
         header = new Node(-1, INT_MAX, maxLevel + 1);
         srand(time(nullptr));
+        playerScores.resize(200000, -1); 
     }
 
     void addScore(int playerID, int score) override
@@ -153,8 +154,14 @@ public:
         // TODO: Implement skip list insertion
         // Remember to maintain descending order by score
 
+        if (playerID >= playerScores.size()) {
+            playerScores.resize(playerID * 2, -1);
+        }
         // Remove old score if player exists
-        removePlayer(playerID);
+        if (playerScores[playerID] != -1) {
+            removePlayer(playerID);
+        }
+        playerScores[playerID] = score;
 
         vector<Node *> update(maxLevel + 1, nullptr);
         Node *current = header;
@@ -650,7 +657,7 @@ public:
         // if the value doesn't exist in the tree
         if (node == nullptr)
         {
-            cout << "THIS ITEM DOES NOT EXISTS!!!!" << endl;
+            // cout << "THIS ITEM DOES NOT EXISTS!!!!" << endl;
             return;
         }
         // finding the predecessor of the node and save it in newNode, if the node has one child the newNode will be the node itself
