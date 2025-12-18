@@ -27,18 +27,21 @@ class ConcretePlayerTable : public PlayerTable
 private:
     // TODO: Define your data structures here
     // Hint: You'll need a hash table with double hashing collision resolution
-    struct Player {
+    struct Player
+    {
         int ID;
         string Name;
-        bool is_occupied ;
+        bool is_occupied;
     };
-    int H1 (int playerId) {
+    int H1(int playerId)
+    {
         double A = 0.618033;
         double val = playerId * A;
         double fractionalPart = val - floor(val); // تعادل (val % 1)
         return floor(101 * fractionalPart);
     }
-    int H2(int playerId) {
+    int H2(int playerId)
+    {
         return 13 - (playerId % 13);
     }
     Player playersTable[101];
@@ -47,7 +50,8 @@ public:
     ConcretePlayerTable()
     {
         // TODO: Initialize your hash table
-        for (auto &p: playersTable) {
+        for (auto &p : playersTable)
+        {
             p.is_occupied = false;
             p.ID = -1;
             p.Name = "";
@@ -60,12 +64,14 @@ public:
         // Remember to handle collisions using h1(key) + i * h2(key)
         int h1 = H1(playerID);
         int h2 = H2(playerID);
-        int i = 0 ;
-        int idx = (h1+ i*h2) % 101;
-        while(playersTable[idx].is_occupied && i < 101) {
-            idx = (h1+ ++i*h2) % 101;
+        int i = 0;
+        int idx = (h1 + i * h2) % 101;
+        while (playersTable[idx].is_occupied && i < 101)
+        {
+            idx = (h1 + ++i * h2) % 101;
         }
-        if(i >= 101) {
+        if (i >= 101)
+        {
             throw runtime_error("Table is Full");
         }
         playersTable[idx].ID = playerID;
@@ -79,13 +85,16 @@ public:
         // Return "" if player not found
         int h1 = H1(playerID);
         int h2 = H2(playerID);
-        int i = 0 ;
-        while (i < 101) {
-            int idx = (h1+ i*h2) % 101;
-            if (!playersTable[idx].is_occupied) {
-                return "" ;
+        int i = 0;
+        while (i < 101)
+        {
+            int idx = (h1 + i * h2) % 101;
+            if (!playersTable[idx].is_occupied)
+            {
+                return "";
             }
-            if (playersTable[idx].ID == playerID) {
+            if (playersTable[idx].ID == playerID)
+            {
                 return playersTable[idx].Name;
             }
             i++;
@@ -231,17 +240,19 @@ class ConcreteAuctionTree : public AuctionTree
 private:
     // TODO: Define your Red-Black Tree node structure
     // Hint: Each node needs: id, price, color, left, right, parent pointers
-    enum Color{
-        red, black
-    }; 
+    enum Color
+    {
+        red,
+        black
+    };
 
     class Node
     {
     public:
         int id;
-        int price; 
+        int price;
         Color color;
-        bool Dblack; 
+        bool Dblack;
         Node *parent;
         Node *left;
         Node *right;
@@ -254,14 +265,14 @@ private:
             color = red;
             Dblack = false;
             price = INT_MIN;
-            id = INT_MIN;   
+            id = INT_MIN;
         }
         Node(int id, int price)
         {
             this->price = price;
-            this->id = id; 
-            color = red; 
-            Dblack = false; 
+            this->id = id;
+            color = red;
+            Dblack = false;
             parent = nullptr;
             left = nullptr;
             right = nullptr;
@@ -269,403 +280,406 @@ private:
         Node(bool isDoubleBlack)
         {
             Dblack = isDoubleBlack;
-            color = black; 
+            color = black;
             parent = nullptr;
             left = nullptr;
             right = nullptr;
             price = INT_MIN;
-            id = INT_MIN;   
+            id = INT_MIN;
         }
     };
 
-    void leftRotation(Node* node) 
+    void leftRotation(Node *node)
     {
-        //check if the node or it's child is null 
-        if(node == nullptr || node->right == nullptr)
-            return; 
+        // check if the node or it's child is null
+        if (node == nullptr || node->right == nullptr)
+            return;
         // saving the right child and it's left subtree
-        Node* rightchild = node->right; 
-        Node* leftgrandchild = rightchild->left;
-        //moving the subtree to it's new parent (the main node)
-        node->right = leftgrandchild; 
-        if(leftgrandchild != nullptr)
-            leftgrandchild->parent = node; 
-        //making the rotation and handling the new root of the subtree
-        rightchild->left = node; 
-        rightchild->parent = node->parent; 
-        if(node->parent == nullptr)
-            root = rightchild; 
-        else if(node == node->parent->right)
-            node->parent->right = rightchild; 
-        else 
-            node->parent->left = rightchild; 
-        //changing the parent of the old root 
-        node->parent = rightchild;  
+        Node *rightchild = node->right;
+        Node *leftgrandchild = rightchild->left;
+        // moving the subtree to it's new parent (the main node)
+        node->right = leftgrandchild;
+        if (leftgrandchild != nullptr)
+            leftgrandchild->parent = node;
+        // making the rotation and handling the new root of the subtree
+        rightchild->left = node;
+        rightchild->parent = node->parent;
+        if (node->parent == nullptr)
+            root = rightchild;
+        else if (node == node->parent->right)
+            node->parent->right = rightchild;
+        else
+            node->parent->left = rightchild;
+        // changing the parent of the old root
+        node->parent = rightchild;
     }
-    void rightRotation(Node* node)
+    void rightRotation(Node *node)
     {
-        //check if the node or it's child is null 
-        if(node == nullptr || node->left == nullptr)
-            return; 
+        // check if the node or it's child is null
+        if (node == nullptr || node->left == nullptr)
+            return;
         // saving the right child and it's right subtree
-        Node* leftchild = node->left; 
-        Node* rightgrandchild = leftchild->right;
-        //moving the subtree to it's new parent (the main node)
-        node->left = rightgrandchild; 
-        if(rightgrandchild != nullptr)
-            rightgrandchild->parent = node; 
-        //making the rotation and handling the new root of the subtree
-        leftchild->right = node; 
-        leftchild->parent = node->parent; 
-        if(node->parent == nullptr)
-            root = leftchild; 
-        else if(node == node->parent->left)
-            node->parent->left = leftchild; 
-        else 
-            node->parent->right = leftchild; 
-        //changing the parent of the old root 
-        node->parent = leftchild;  
+        Node *leftchild = node->left;
+        Node *rightgrandchild = leftchild->right;
+        // moving the subtree to it's new parent (the main node)
+        node->left = rightgrandchild;
+        if (rightgrandchild != nullptr)
+            rightgrandchild->parent = node;
+        // making the rotation and handling the new root of the subtree
+        leftchild->right = node;
+        leftchild->parent = node->parent;
+        if (node->parent == nullptr)
+            root = leftchild;
+        else if (node == node->parent->left)
+            node->parent->left = leftchild;
+        else
+            node->parent->right = leftchild;
+        // changing the parent of the old root
+        node->parent = leftchild;
     }
 
-    void fixInsert(Node* node)
+    void fixInsert(Node *node)
     {
-        //Base Case 
-        if(node == nullptr)
-            return; 
-        if(node == root)
+        // Base Case
+        if (node == nullptr)
+            return;
+        if (node == root)
         {
-            node->color = black; 
-            return; 
+            node->color = black;
+            return;
         }
-        //no violation 
-        if(node->parent->color == black)
-            return; 
-        Node* parent = node->parent; 
-        Node* grandparent = node->parent->parent;
-        //parent is the root 
-        if(grandparent == nullptr)
+        // no violation
+        if (node->parent->color == black)
+            return;
+        Node *parent = node->parent;
+        Node *grandparent = node->parent->parent;
+        // parent is the root
+        if (grandparent == nullptr)
         {
-            parent->color = black; 
-            return; 
+            parent->color = black;
+            return;
         }
-        if(parent == grandparent->left)
+        if (parent == grandparent->left)
         {
-            Node* uncle = grandparent->right; 
-            if(uncle != nullptr && uncle->color == red)
+            Node *uncle = grandparent->right;
+            if (uncle != nullptr && uncle->color == red)
             {
-                //case 1 & 2 : uncle is red. just recoloring and call fix on grandfather 
-                parent->color = black; 
-                uncle->color = black; 
-                grandparent->color = red; 
-                fixInsert(grandparent); 
+                // case 1 & 2 : uncle is red. just recoloring and call fix on grandfather
+                parent->color = black;
+                uncle->color = black;
+                grandparent->color = red;
+                fixInsert(grandparent);
             }
-            else 
+            else
             {
                 // recoloring. same result in case 3 and 4
-                grandparent->color = red; 
-                parent->color = black; 
-                if(node == parent->right) // case 3 : the problem is left right. changing it to case 4
-                    leftRotation(parent); 
-                rightRotation(grandparent); //case 4 : final rotaion 
-                if (root) root->color = black;
+                grandparent->color = red;
+                parent->color = black;
+                if (node == parent->right) // case 3 : the problem is left right. changing it to case 4
+                    leftRotation(parent);
+                rightRotation(grandparent); // case 4 : final rotaion
+                if (root)
+                    root->color = black;
                 return;
             }
         }
-        else 
+        else
         {
-            Node* uncle = grandparent->left; 
-            if(uncle != nullptr && uncle->color == red)
+            Node *uncle = grandparent->left;
+            if (uncle != nullptr && uncle->color == red)
             {
-                //case 1 & 2 : uncle is red. just recoloring and call fix on grandfather
-                parent->color = black; 
-                uncle->color = black; 
-                grandparent->color = red; 
-                fixInsert(grandparent); 
+                // case 1 & 2 : uncle is red. just recoloring and call fix on grandfather
+                parent->color = black;
+                uncle->color = black;
+                grandparent->color = red;
+                fixInsert(grandparent);
             }
-            else 
+            else
             {
                 // recoloring. same result in case 3 and 4
-                grandparent->color = red; 
-                parent->color = black; 
-                if(node == parent->left) // case 3 : the problem is left right. changing it to case 4
-                    rightRotation(parent); 
-                leftRotation(grandparent); //case 4 : final rotaion 
-                if (root) root->color = black;
-                return; 
+                grandparent->color = red;
+                parent->color = black;
+                if (node == parent->left) // case 3 : the problem is left right. changing it to case 4
+                    rightRotation(parent);
+                leftRotation(grandparent); // case 4 : final rotaion
+                if (root)
+                    root->color = black;
+                return;
             }
         }
-        if(root) root->color = black; 
+        if (root)
+            root->color = black;
     }
 
-
-    void fixDelete(Node* node)
+    void fixDelete(Node *node)
     {
-        if(node == nullptr)
+        if (node == nullptr)
         {
-            cout << "CAN'T FIX A NULL NODE" << endl; 
-            return; 
-        }
-        if(node == root)
-        {
-            node->color = black; 
-            node->Dblack = false;
-            cleanNil(node); 
-            return;  
-        }
-        if(!node->Dblack)
-        {
-            cleanNil(node); 
+            cout << "CAN'T FIX A NULL NODE" << endl;
             return;
         }
-        if(node->Dblack && node->color == red)
+        if (node == root)
         {
-            node->color = black; 
-            node->Dblack = false; 
-            cleanNil(node); 
-            return; 
+            node->color = black;
+            node->Dblack = false;
+            cleanNil(node);
+            return;
         }
-        if(node->parent->left == node)
+        if (!node->Dblack)
         {
-            Node* sibling = node->parent->right; 
-            if(sibling && sibling->color == red) // case 1 : the sibling is red
+            cleanNil(node);
+            return;
+        }
+        if (node->Dblack && node->color == red)
+        {
+            node->color = black;
+            node->Dblack = false;
+            cleanNil(node);
+            return;
+        }
+        if (node->parent->left == node)
+        {
+            Node *sibling = node->parent->right;
+            if (sibling && sibling->color == red) // case 1 : the sibling is red
             {
-                //recolor the new parent and grandparent (the old parent and sibling)
-                sibling->color = black; 
-                node->parent->color = red; 
-                leftRotation(node->parent); //left rotate around the parent
-                fixDelete(node); 
-                return; 
+                // recolor the new parent and grandparent (the old parent and sibling)
+                sibling->color = black;
+                node->parent->color = red;
+                leftRotation(node->parent); // left rotate around the parent
+                fixDelete(node);
+                return;
             }
-            else 
+            else
             {
-                if(sibling && sibling->right && sibling->right->color == red)//case 4 : the far nephew is red
+                if (sibling && sibling->right && sibling->right->color == red) // case 4 : the far nephew is red
                 {
-                    sibling->right->color = black; 
-                    Color temp = sibling->color; 
-                    sibling->color = node->parent->color; 
-                    node->parent->color = temp; 
-                    leftRotation(node->parent); 
-                    node->Dblack = false; 
-                    cleanNil(node); 
-                    return; 
+                    sibling->right->color = black;
+                    Color temp = sibling->color;
+                    sibling->color = node->parent->color;
+                    node->parent->color = temp;
+                    leftRotation(node->parent);
+                    node->Dblack = false;
+                    cleanNil(node);
+                    return;
                 }
-                else if(sibling && sibling->left && sibling->left->color == red)//case 3 : the near nephew is red
+                else if (sibling && sibling->left && sibling->left->color == red) // case 3 : the near nephew is red
                 {
-                    //recolor new sibling and far nephew(near nephew before rotation) (changing it into case 4)
-                    sibling->color = red; 
-                    sibling->left->color = black; 
-                    rightRotation(sibling); //right rotate around the sibling 
-                    fixDelete(node); //call recursively so it'll solve the violation after it became case 4
-                    return; 
+                    // recolor new sibling and far nephew(near nephew before rotation) (changing it into case 4)
+                    sibling->color = red;
+                    sibling->left->color = black;
+                    rightRotation(sibling); // right rotate around the sibling
+                    fixDelete(node);        // call recursively so it'll solve the violation after it became case 4
+                    return;
                 }
-                else //case 2 : sibling exists and his childrens are black 
+                else // case 2 : sibling exists and his childrens are black
                 {
-                    node->Dblack = false; 
+                    node->Dblack = false;
                     node->parent->Dblack = true;
-                    if(sibling) 
-                        sibling->color = red; 
-                    cleanNil(node); 
-                    fixDelete(node->parent); 
-                    return; 
+                    if (sibling)
+                        sibling->color = red;
+                    cleanNil(node);
+                    fixDelete(node->parent);
+                    return;
                 }
             }
         }
-        else 
+        else
         {
-            Node* sibling = node->parent->left; 
-            if(sibling && sibling->color == red) // case 1 : the sibling is red
+            Node *sibling = node->parent->left;
+            if (sibling && sibling->color == red) // case 1 : the sibling is red
             {
-                //recolor the new parent and grandparent (the old parent and sibling)
-                sibling->color = black; 
-                node->parent->color = red; 
-                rightRotation(node->parent); //right rotate around the parent
-                fixDelete(node); 
-                return; 
+                // recolor the new parent and grandparent (the old parent and sibling)
+                sibling->color = black;
+                node->parent->color = red;
+                rightRotation(node->parent); // right rotate around the parent
+                fixDelete(node);
+                return;
             }
-            else 
+            else
             {
-                if(sibling && sibling->left && sibling->left->color == red)//case 4 : the far nephew is red
+                if (sibling && sibling->left && sibling->left->color == red) // case 4 : the far nephew is red
                 {
                     sibling->left->color = black;
-                    Color temp = sibling->color; 
-                    sibling->color = node->parent->color; 
-                    node->parent->color = temp;  
-                    rightRotation(node->parent); 
-                    node->Dblack = false; 
-                    cleanNil(node); 
-                    return; 
+                    Color temp = sibling->color;
+                    sibling->color = node->parent->color;
+                    node->parent->color = temp;
+                    rightRotation(node->parent);
+                    node->Dblack = false;
+                    cleanNil(node);
+                    return;
                 }
-                else if(sibling && sibling->right && sibling->right->color == red)//case 3 : the near nephew is red
+                else if (sibling && sibling->right && sibling->right->color == red) // case 3 : the near nephew is red
                 {
-                    //recolor new sibling and far nephew(near nephew before rotation) (changing it into case 4)
-                    sibling->color = red; 
-                    sibling->right->color = black; 
-                    leftRotation(sibling); //left rotate around the sibling 
-                    fixDelete(node); //call recursively so it'll solve the violation after it became case 4
-                    return; 
+                    // recolor new sibling and far nephew(near nephew before rotation) (changing it into case 4)
+                    sibling->color = red;
+                    sibling->right->color = black;
+                    leftRotation(sibling); // left rotate around the sibling
+                    fixDelete(node);       // call recursively so it'll solve the violation after it became case 4
+                    return;
                 }
-                else //case 2 : sibling exists and his childrens are black 
+                else // case 2 : sibling exists and his childrens are black
                 {
-                    node->Dblack = false; 
+                    node->Dblack = false;
                     node->parent->Dblack = true;
-                    if(sibling) 
-                        sibling->color = red; 
-                    cleanNil(node); 
-                    fixDelete(node->parent); 
-                    return; 
+                    if (sibling)
+                        sibling->color = red;
+                    cleanNil(node);
+                    fixDelete(node->parent);
+                    return;
                 }
             }
         }
-        if(root)
+        if (root)
         {
-            root->color = black; 
-            root->Dblack = false; 
+            root->color = black;
+            root->Dblack = false;
         }
-        cleanNil(node); 
+        cleanNil(node);
     }
 
-
-    void cleanNil(Node* node)
+    void cleanNil(Node *node)
     {
-        if(node->id == INT_MIN && !node->Dblack)
+        if (node->id == INT_MIN && !node->Dblack)
         {
-            relinkNode(node, nullptr); 
-            delete node; 
+            relinkNode(node, nullptr);
+            delete node;
         }
     }
 
-
-    Node* predecessor(Node* node)
+    Node *predecessor(Node *node)
     {
-        while(node && node->right)
-            node = node->right; 
-        return node; 
-    } 
+        while (node && node->right)
+            node = node->right;
+        return node;
+    }
 
-    void relinkNode(Node* oldNode, Node* newNode)
+    void relinkNode(Node *oldNode, Node *newNode)
     {
-        if(oldNode->parent == nullptr)
-            root = newNode; 
+        if (oldNode->parent == nullptr)
+            root = newNode;
         else if (oldNode->parent->right == oldNode)
-            oldNode->parent->right = newNode; 
-        else 
-            oldNode->parent->left = newNode; 
-        if(newNode) 
+            oldNode->parent->right = newNode;
+        else
+            oldNode->parent->left = newNode;
+        if (newNode)
             newNode->parent = oldNode->parent;
     }
 
-    Node* searchElement(int id, Node* node)
+    Node *searchElement(int id, Node *node)
     {
-        if(node == nullptr)
+        if (node == nullptr)
             return nullptr;
-        if(node->id == id)
-            return node; 
-        Node* leftResult = searchElement(id, node->left);
-        if(leftResult != nullptr)
+        if (node->id == id)
+            return node;
+        Node *leftResult = searchElement(id, node->left);
+        if (leftResult != nullptr)
             return leftResult;
-        return searchElement(id, node->right);  
+        return searchElement(id, node->right);
     }
 
-    void clear(Node* node)
+    void clear(Node *node)
     {
-        if(!node)
-            return; 
-        clear(node->left); 
-        clear(node->right); 
-        delete node; 
+        if (!node)
+            return;
+        clear(node->left);
+        clear(node->right);
+        delete node;
     }
 
-    Node* root;
-    
+    Node *root;
+
 public:
     ConcreteAuctionTree()
     {
         // TODO: Initialize your Red-Black Tree
-        root = nullptr; 
+        root = nullptr;
     }
 
     void insertItem(int itemID, int price) override
     {
         // TODO: Implement Red-Black Tree insertion
         // Remember to maintain RB-Tree properties with rotations and recoloring
-        Node* node = new Node(itemID, price); 
-        if(root == nullptr)
+        Node *node = new Node(itemID, price);
+        if (root == nullptr)
         {
-            node->color = black; 
-            root = node; 
-            return; 
+            node->color = black;
+            root = node;
+            return;
         }
-        Node* current = root; 
-        Node* parent = nullptr; 
-        while(current != nullptr)
+        Node *current = root;
+        Node *parent = nullptr;
+        while (current != nullptr)
         {
-            parent = current; 
-            if (price > current->price) {
-                current = current->right; 
-            } else {
-                current = current->left; 
+            parent = current;
+            if (price > current->price)
+            {
+                current = current->right;
+            }
+            else
+            {
+                current = current->left;
             }
         }
-        node->parent = parent; 
-        if(node->price > parent->price)
-            parent->right = node; 
+        node->parent = parent;
+        if (node->price > parent->price)
+            parent->right = node;
         else
-            parent->left = node; 
-        if(parent->color == red)
-            fixInsert(node); 
+            parent->left = node;
+        if (parent->color == red)
+            fixInsert(node);
     }
 
     void deleteItem(int itemID) override
     {
         // TODO: Implement Red-Black Tree deletion
         // This is complex - handle all cases carefully
-        Node* node = searchElement(itemID, root); 
-        //if the value doesn't exist in the tree 
-        if(node == nullptr)
+        Node *node = searchElement(itemID, root);
+        // if the value doesn't exist in the tree
+        if (node == nullptr)
         {
-            cout << "THIS ITEM DOES NOT EXISTS!!!!" << endl; 
-            return; 
+            cout << "THIS ITEM DOES NOT EXISTS!!!!" << endl;
+            return;
         }
-        //finding the predecessor of the node and save it in newNode, if the node has one child the newNode will be the node itself 
-        Node* newNode = node; 
-        if(node->left && node->right)
-            newNode = predecessor(node->left); 
-        //copying the value of the predecessor into the node, now i need to delete the newNode
-        node->price = newNode->price; 
-        node->id = newNode->id; 
-        //if it has one child (it can have at most one child since it's the presuccessor)
-        if(newNode->left || newNode->right)
+        // finding the predecessor of the node and save it in newNode, if the node has one child the newNode will be the node itself
+        Node *newNode = node;
+        if (node->left && node->right)
+            newNode = predecessor(node->left);
+        // copying the value of the predecessor into the node, now i need to delete the newNode
+        node->price = newNode->price;
+        node->id = newNode->id;
+        // if it has one child (it can have at most one child since it's the presuccessor)
+        if (newNode->left || newNode->right)
         {
-            Node* newChild = newNode->left? newNode->left : newNode->right; //saving the child to link it with the newNode's parent
-            relinkNode(newNode, newChild); //deleting the newNode from the tree
-            if(newNode->color == black)
+            Node *newChild = newNode->left ? newNode->left : newNode->right; // saving the child to link it with the newNode's parent
+            relinkNode(newNode, newChild);                                   // deleting the newNode from the tree
+            if (newNode->color == black)
             {
-                newChild->Dblack = true; 
-                fixDelete(newChild); 
+                newChild->Dblack = true;
+                fixDelete(newChild);
             }
-            delete newNode; 
+            delete newNode;
         }
-        else //if it has no children 
+        else // if it has no children
         {
-            if(newNode->color == black)//if it's color is black, make a delusional node (a NIL node) that is double balck and link it in the node's place 
+            if (newNode->color == black) // if it's color is black, make a delusional node (a NIL node) that is double balck and link it in the node's place
             {
-                Node* newChild = new Node(true);
-                relinkNode(newNode, newChild);  
-                delete newNode; 
-                fixDelete(newChild); 
+                Node *newChild = new Node(true);
+                relinkNode(newNode, newChild);
+                delete newNode;
+                fixDelete(newChild);
             }
-            else //if it's color is red (note that it's a leaf), just reassign the parent pointer and delete the node
+            else // if it's color is red (note that it's a leaf), just reassign the parent pointer and delete the node
             {
-                relinkNode(newNode, nullptr);  
-                delete newNode; 
-                return; 
+                relinkNode(newNode, nullptr);
+                delete newNode;
+                return;
             }
         }
     }
 
     ~ConcreteAuctionTree()
     {
-        clear(root); 
+        clear(root);
     }
 };
 
@@ -678,33 +692,37 @@ int best, cnt, mn, target;
 int dp[51][100000];
 int InventorySystem::optimizeLootSplit(int n, vector<int> &coins)
 {
-    if(n == coins.size()) {
+    if (n == coins.size())
+    {
         for (int i = 0; i < n; i++)
         {
             sum += coins[i];
         }
-        target = sum/2;
+        target = sum / 2;
         mn = 1e9;
         best = 0;
         cnt = 0;
         n--;
     }
-    if(n == -1){
-        if(mn > abs(cnt-target)){
-            mn = abs(cnt-target);
+    if (n == -1)
+    {
+        if (mn > abs(cnt - target))
+        {
+            mn = abs(cnt - target);
             best = cnt;
         }
-        return abs(best-(sum-best));
+        return abs(best - (sum - best));
     }
     int &ret = dp[n][cnt];
-    if(~ret) {
+    if (~ret)
+    {
         return ret;
     }
     cnt += coins[n];
-    int take = optimizeLootSplit(n-1, coins);
+    int take = optimizeLootSplit(n - 1, coins);
     cnt -= coins[n];
-    int skip = optimizeLootSplit(n-1, coins);
-    
+    int skip = optimizeLootSplit(n - 1, coins);
+
     return ret = min(take, skip);
 }
 
@@ -724,18 +742,18 @@ long long InventorySystem::countStringPossibilities(string s)
     // Count total possible decodings
     if (s.length() != 0)
     {
-        const long long mod = 1e9 + 7; 
-        int n = s.length(); 
-        long long ans[n+1] = {1}; 
-        s = ' ' + s; 
-        for(int i = 1; i <= n; i++)
+        const long long mod = 1e9 + 7;
+        int n = s.length();
+        long long ans[n + 1] = {1};
+        s = ' ' + s;
+        for (int i = 1; i <= n; i++)
         {
-            if((s[i-1] == 'u' || s[i-1] == 'n') && s[i-1] == s[i])
-                ans[i] = (ans[i-1]%mod + ans[i-2]%mod)%mod; 
-            else 
-                ans[i] = ans[i-1]; 
+            if ((s[i - 1] == 'u' || s[i - 1] == 'n') && s[i - 1] == s[i])
+                ans[i] = (ans[i - 1] % mod + ans[i - 2] % mod) % mod;
+            else
+                ans[i] = ans[i - 1];
         }
-        return ans[n]; 
+        return ans[n];
     }
     return 0;
 }
@@ -793,44 +811,48 @@ bool WorldNavigator::pathExists(int n, vector<vector<int>> &edges, int source, i
 long long WorldNavigator::minBribeCost(int n, int m, long long goldRate, long long silverRate,
                                        vector<vector<int>> &roadData)
 {
-    vector<vector<pair<int,long long>>>adj(n+1);
-    vector<bool>visited(n+1);
+    vector<vector<pair<int, long long>>> adj(n + 1);
+    vector<bool> visited(n + 1);
 
     for (int i = 0; i < m; i++)
     {
         int u = roadData[i][0], v = roadData[i][1];
-        long long weight = 1LL * roadData[i][2]*goldRate + 1LL * roadData[i][3]*silverRate; 
+        long long weight = 1LL * roadData[i][2] * goldRate + 1LL * roadData[i][3] * silverRate;
         adj[u].push_back({v, weight});
-        adj[v].push_back({u,weight});
+        adj[v].push_back({u, weight});
     }
 
-    priority_queue<pair<long long,int>,vector<pair<long long,int>>,greater<pair<long long,int>>>pq;
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
 
-    pq.push({0,1});
+    pq.push({0, 1});
 
     long long total_cost = 0;
     int visited_cities = 0;
-    while(visited_cities < n && !pq.empty()){
+    while (visited_cities < n && !pq.empty())
+    {
 
         long long weight = pq.top().first;
         int city = pq.top().second;
         pq.pop();
 
-        if(visited[city]) continue;
+        if (visited[city])
+            continue;
 
         visited[city] = 1;
         visited_cities++;
         total_cost += weight;
-        for(auto u : adj[city]){
-            if(!visited[u.first]){
+        for (auto u : adj[city])
+        {
+            if (!visited[u.first])
+            {
                 pq.push({u.second, u.first});
             }
         }
-
     }
 
-    if(visited_cities == n) return total_cost;
-    
+    if (visited_cities == n)
+        return total_cost;
+
     return -1;
 }
 
@@ -920,16 +942,18 @@ int ServerKernel::minIntervals(vector<char> &tasks, int n)
     // Return minimum total intervals needed (including idle time)
     // Hint: Use greedy approach with frequency counting
     vector<int> freq(26);
-    for (char c :tasks) {
-        freq[c-'A']++;
+    for (char c : tasks)
+    {
+        freq[c - 'A']++;
     }
-    int max_frequent = *max_element(freq.begin() , freq.end());
+    int max_frequent = *max_element(freq.begin(), freq.end());
     int max_count = 0;
-    for (int i : freq) {
+    for (int i : freq)
+    {
         if (i == max_frequent)
             max_count++;
     }
-    int total_intervals = (max_frequent -1)* (n+1)+max_count();
+    int total_intervals = (max_frequent - 1) * (n + 1) + max_count;
 
     return max((int)tasks.size(), total_intervals);
     return 0;
