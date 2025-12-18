@@ -35,10 +35,7 @@ private:
     };
     int H1(int playerId)
     {
-        double A = 0.618033;
-        double val = playerId * A;
-        double fractionalPart = val - floor(val); // تعادل (val % 1)
-        return floor(101 * fractionalPart);
+        return playerId % 101;
     }
     int H2(int playerId)
     {
@@ -68,18 +65,17 @@ public:
         int idx = (h1 + i * h2) % 101;
         while (playersTable[idx].is_occupied && i < 101)
         {
+            if(playersTable[idx].is_occupied && playersTable[idx].ID == playerID)
+            {
+                playersTable[idx].Name = name;
+                return;
+            }
             idx = (h1 + ++i * h2) % 101;
         }
         if (i >= 101)
         {
             cout << "Table is Full";
             return ;
-        }
-        if( playersTable[idx].is_occupied && playersTable[idx].ID == playerID)
-        {
-            // Update existing player's name
-            playersTable[idx].Name = name;
-            return;
         }
         playersTable[idx].ID = playerID;
         playersTable[idx].is_occupied = true;
@@ -990,6 +986,8 @@ int ServerKernel::minIntervals(vector<char> &tasks, int n)
     // Same task must wait 'n' intervals before running again
     // Return minimum total intervals needed (including idle time)
     // Hint: Use greedy approach with frequency counting
+    if(tasks.size() == 0)
+        return 0;
     vector<int> freq(26);
     for (char c : tasks)
     {
@@ -1005,7 +1003,6 @@ int ServerKernel::minIntervals(vector<char> &tasks, int n)
     int total_intervals = (max_frequent - 1) * (n + 1) + max_count;
 
     return max((int)tasks.size(), total_intervals);
-    return 0;
 }
 
 // =========================================================
