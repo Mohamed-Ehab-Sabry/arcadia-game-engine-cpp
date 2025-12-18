@@ -72,7 +72,14 @@ public:
         }
         if (i >= 101)
         {
-            throw runtime_error("Table is Full");
+            cout << "Table is Full";
+            return ;
+        }
+        if( playersTable[idx].is_occupied && playersTable[idx].ID == playerID)
+        {
+            // Update existing player's name
+            playersTable[idx].Name = name;
+            return;
         }
         playersTable[idx].ID = playerID;
         playersTable[idx].is_occupied = true;
@@ -621,7 +628,7 @@ public:
         while (current != nullptr)
         {
             parent = current;
-            if (price > current->price)
+            if (price > current->price || (price == current->price && itemID > current->id))
             {
                 current = current->right;
             }
@@ -779,22 +786,22 @@ long long InventorySystem::countStringPossibilities(string s)
     // Rules: "uu" can be decoded as "w" or "uu"
     //        "nn" can be decoded as "m" or "nn"
     // Count total possible decodings
-    if (s.length() != 0)
+    if (s.length() == 0)
+        return 1; 
+    if(s.find('m') != string::npos || s.find('w') != string::npos)
+        return 0;
+    const long long mod = 1e9 + 7;
+    int n = s.length();
+    long long ans[n + 1] = {1};
+    s = ' ' + s;
+    for (int i = 1; i <= n; i++)
     {
-        const long long mod = 1e9 + 7;
-        int n = s.length();
-        long long ans[n + 1] = {1};
-        s = ' ' + s;
-        for (int i = 1; i <= n; i++)
-        {
-            if ((s[i - 1] == 'u' || s[i - 1] == 'n') && s[i - 1] == s[i])
-                ans[i] = (ans[i - 1] % mod + ans[i - 2] % mod) % mod;
-            else
-                ans[i] = ans[i - 1];
-        }
-        return ans[n];
+        if ((s[i - 1] == 'u' || s[i - 1] == 'n') && s[i - 1] == s[i])
+            ans[i] = (ans[i - 1] % mod + ans[i - 2] % mod) % mod;
+        else
+            ans[i] = ans[i - 1];
     }
-    return 0;
+    return ans[n];
 }
 
 // =========================================================
@@ -910,8 +917,11 @@ string WorldNavigator::sumMinDistancesBinary(int n, vector<vector<int>> &roads)
 
     for (auto &road : roads)
     {
-
-        shortest_path[road[0]][road[1]] = min((long long)road[2], shortest_path[road[0]][road[1]]);
+        int u = road[0];
+        int v = road[1];
+        long long w = road[2];
+        shortest_path[u][v] = min(w, shortest_path[u][v]);
+        shortest_path[v][u] = min(w, shortest_path[v][u]);
     }
 
     for (int k = 0; k < n; k++)
